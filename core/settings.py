@@ -1,14 +1,24 @@
 import os
 from pathlib import Path
 from dotenv import load_dotenv
-from urllib.parse import urlparse
 
 load_dotenv()
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.getenv('SECRET_KEY', 'unsafe-secret-key')
-DEBUG = os.getenv('DEBUG', 'True') == 'True'
-ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
+
+DEBUG = os.getenv('DEBUG', 'False') == 'True'
+
+ALLOWED_HOSTS = [
+    'localhost',
+    '127.0.0.1',
+    'ai-resume-inteligence.onrender.com'
+]
+
+CSRF_TRUSTED_ORIGINS = [
+    'https://ai-resume-inteligence.onrender.com'
+]
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -17,8 +27,10 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
     'rest_framework',
     'corsheaders',
+
     'users',
     'resumes',
     'ai_engine',
@@ -31,6 +43,8 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
+
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -87,18 +101,33 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 LANGUAGE_CODE = 'en-us'
+
 TIME_ZONE = 'UTC'
+
 USE_I18N = True
+
 USE_TZ = True
+
 STATIC_URL = '/static/'
+
 STATICFILES_DIRS = [BASE_DIR / 'static']
+
 STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
 MEDIA_URL = '/media/'
+
 MEDIA_ROOT = BASE_DIR / 'media'
+
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 CORS_ALLOW_ALL_ORIGINS = True
+
 LOGIN_URL = 'users:login'
+
 LOGIN_REDIRECT_URL = 'users:dashboard'
+
 LOGOUT_REDIRECT_URL = 'users:login'
+
 GEMINI_API_KEY = os.getenv('GEMINI_API_KEY', '')
