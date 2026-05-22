@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% block content %}
+<style>
+  @media print {
+    body * { visibility: hidden; }
+    #resume-print-area, #resume-print-area * { visibility: visible; }
+    #resume-print-area {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 100%;
+      background: white !important;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+  }
+</style>
+<div class="rounded-[2rem] bg-slate-900/90 p-8 shadow-2xl shadow-slate-900/40">
+  <div class="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+    <div>
+      <p class="text-sm uppercase tracking-[0.3em] text-indigo-300">Preview mode</p>
+      <h1 class="text-3xl font-semibold text-white">{{ resume.title }} — {{ template_style|title }}</h1>
+    </div>
+    <button onclick="window.print()" class="rounded-full bg-indigo-500 px-5 py-3 text-sm font-semibold text-white hover:bg-indigo-400">Download PDF</button>
+  </div>
+  <div id="resume-print-area" class="prose prose-invert max-w-none rounded-3xl bg-slate-950/80 p-8 text-slate-100" style="-webkit-print-color-adjust: exact; print-color-adjust: exact;">
+    {{ html_content|safe }}
+  </div>
+</div>
+{% endblock %}

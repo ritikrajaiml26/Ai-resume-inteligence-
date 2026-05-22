@@ -1,0 +1,94 @@
+<div style="font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color:#1e293b; line-height:1.6; background-color:#ffffff; padding:50px; min-height:1100px;">
+  <!-- Modern Header -->
+  <header style="margin-bottom:40px; display:flex; justify-content:space-between; align-items:flex-end;">
+    <div style="border-left:8px solid #4f46e5; padding-left:25px;">
+      <h1 style="font-size:48px; font-weight:900; margin:0; color:#0f172a; text-transform:uppercase; line-height:1;">{{ resume.full_name|default:resume.user.get_full_name|default:resume.user.username|title }}</h1>
+      <h2 style="font-size:22px; font-weight:600; margin:10px 0 0; color:#4f46e5;">{{ resume.title }}</h2>
+    </div>
+    <div style="text-align:right; font-size:14px; color:#64748b;">
+      <p style="margin:0 0 4px;">{{ resume.contact_email }}</p>
+      <p style="margin:0 0 4px;">{{ resume.contact_phone }}</p>
+      {% if resume.linkedin_url %}<p style="margin:0;">{{ resume.linkedin_url }}</p>{% endif %}
+    </div>
+  </header>
+
+  <!-- Summary -->
+  <section style="margin-bottom:45px; background:#f8fafc; padding:25px; border-radius:8px; border-left:4px solid #4f46e5;">
+    <h3 style="font-size:16px; font-weight:800; color:#0f172a; text-transform:uppercase; margin-top:0; margin-bottom:10px;">Professional Summary</h3>
+    <p style="margin:0; color:#334155; font-size:15px; text-align:justify;">{{ resume.summary }}</p>
+  </section>
+
+  <div style="display:flex; gap:50px;">
+    <!-- Main Column -->
+    <div style="flex:2;">
+      <!-- Experience -->
+      <section style="margin-bottom:40px;">
+        <h3 style="font-size:18px; font-weight:800; color:#0f172a; text-transform:uppercase; border-bottom:2px solid #e2e8f0; padding-bottom:8px; margin-bottom:20px;">Work Experience</h3>
+        {% for exp in resume.experiences.all %}
+        <div style="margin-bottom:30px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
+            <h4 style="margin:0; font-size:17px; font-weight:700; color:#1e293b;">{{ exp.role }}</h4>
+            <span style="font-size:13px; font-weight:600; color:#64748b; background:#f1f5f9; padding:2px 10px; border-radius:4px;">{{ exp.duration }}</span>
+          </div>
+          <p style="margin:0 0 12px; color:#4f46e5; font-weight:700; font-size:15px;">{{ exp.company }} <span style="color:#94a3b8; font-weight:400;">| {{ exp.location }}</span></p>
+          <div style="color:#475569; font-size:14.5px; padding-left:15px;">
+            {{ exp.bullets|linebreaks }}
+          </div>
+        </div>
+        {% endfor %}
+      </section>
+
+      <!-- Projects -->
+      {% if resume.projects.exists %}
+      <section>
+        <h3 style="font-size:18px; font-weight:800; color:#0f172a; text-transform:uppercase; border-bottom:2px solid #e2e8f0; padding-bottom:8px; margin-bottom:20px;">Notable Projects</h3>
+        {% for project in resume.projects.all %}
+        <div style="margin-bottom:25px;">
+          <h4 style="margin:0; font-size:16px; font-weight:700; color:#1e293b;">{{ project.title }}</h4>
+          <p style="margin:3px 0 8px; color:#4f46e5; font-size:13px; font-weight:600;">{{ project.technologies }}</p>
+          <p style="margin:0; color:#475569; font-size:14px;">{{ project.description }}</p>
+        </div>
+        {% endfor %}
+      </section>
+      {% endif %}
+    </div>
+
+    <!-- Side Column -->
+    <div style="flex:1;">
+      <!-- Skills -->
+      <section style="margin-bottom:40px;">
+        <h3 style="font-size:16px; font-weight:800; color:#0f172a; text-transform:uppercase; margin-bottom:20px; border-left:4px solid #4f46e5; padding-left:15px;">Core Skills</h3>
+        <div style="display:flex; flex-wrap:wrap; gap:10px;">
+          {% for skill in resume.skills.all %}
+          <span style="background:#eef2ff; color:#4338ca; padding:6px 14px; border-radius:6px; font-size:13px; font-weight:600; border:1px solid #c7d2fe;">{{ skill.name }}</span>
+          {% endfor %}
+        </div>
+      </section>
+
+      <!-- Education -->
+      <section style="margin-bottom:40px;">
+        <h3 style="font-size:16px; font-weight:800; color:#0f172a; text-transform:uppercase; margin-bottom:20px; border-left:4px solid #4f46e5; padding-left:15px;">Education</h3>
+        {% for edu in resume.educations.all %}
+        <div style="margin-bottom:20px;">
+          <p style="margin:0; font-weight:700; color:#1e293b; font-size:15px;">{{ edu.degree }}</p>
+          <p style="margin:2px 0; color:#4f46e5; font-weight:600; font-size:13px;">{{ edu.institution }}</p>
+          <p style="margin:0; color:#64748b; font-size:12px;">{{ edu.start_date }} - {{ edu.end_date }}</p>
+        </div>
+        {% endfor %}
+      </section>
+
+      <!-- Certifications -->
+      {% if resume.certifications.exists %}
+      <section>
+        <h3 style="font-size:16px; font-weight:800; color:#0f172a; text-transform:uppercase; margin-bottom:20px; border-left:4px solid #4f46e5; padding-left:15px;">Certifications</h3>
+        {% for cert in resume.certifications.all %}
+        <div style="margin-bottom:15px;">
+          <p style="margin:0; font-weight:700; color:#1e293b; font-size:14px;">{{ cert.title }}</p>
+          <p style="margin:2px 0 0; color:#64748b; font-size:12px;">{{ cert.issuer }} | {{ cert.year }}</p>
+        </div>
+        {% endfor %}
+      </section>
+      {% endif %}
+    </div>
+  </div>
+</div>

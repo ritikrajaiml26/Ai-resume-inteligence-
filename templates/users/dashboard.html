@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="grid gap-8 lg:grid-cols-[0.9fr_0.7fr]">
+  <section class="space-y-6">
+    <div class="rounded-3xl bg-slate-900/80 p-8 glass-card shadow-xl shadow-slate-900/10">
+      <div class="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+        <div>
+          <p class="text-sm uppercase tracking-[0.3em] text-indigo-300">Welcome back</p>
+          <h1 class="mt-2 text-4xl font-semibold text-white">Your AI resume dashboard</h1>
+        </div>
+        <div class="flex flex-wrap gap-3">
+          <a href="{% url 'resumes:resume_create' %}" class="inline-flex items-center justify-center rounded-full bg-slate-700 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-600">Quick Upload</a>
+          <a href="{% url 'resumes:manual_builder' %}" class="inline-flex items-center justify-center rounded-full bg-gradient-to-r from-indigo-500 to-pink-500 px-5 py-3 text-sm font-semibold text-white transition hover:scale-105">Manual Resume Builder</a>
+        </div>
+      </div>
+      <div class="mt-8 grid gap-4 sm:grid-cols-3">
+        <div class="rounded-3xl bg-slate-950/80 p-5">
+          <p class="text-sm text-slate-400">Resume count</p>
+          <p class="mt-3 text-3xl font-semibold text-white">{{ stats.resume_count }}</p>
+        </div>
+        <div class="rounded-3xl bg-slate-950/80 p-5">
+          <p class="text-sm text-slate-400">Recent uploads</p>
+          <p class="mt-3 text-3xl font-semibold text-white">{{ stats.recent_ats }}</p>
+        </div>
+        <div class="rounded-3xl bg-slate-950/80 p-5">
+          <p class="text-sm text-slate-400">Active projects</p>
+          <p class="mt-3 text-3xl font-semibold text-white">{{ stats.resume_count|add:'2' }}</p>
+        </div>
+      </div>
+    </div>
+    <div class="rounded-3xl bg-slate-900/80 p-8 glass-card">
+      <h2 class="text-2xl font-semibold text-white">Resume history</h2>
+      <div class="mt-6 space-y-4">
+        {% for resume in resumes %}
+        <div class="rounded-3xl border border-slate-800 bg-slate-950/90 p-5 transition hover:-translate-y-1">
+          <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <div class="flex items-center gap-3">
+                <p class="text-lg font-semibold text-white">{{ resume.title }}</p>
+                {% if resume.ats_analysis %}
+                <span class="rounded-full bg-indigo-500/20 px-2 py-0.5 text-xs font-bold text-indigo-400 border border-indigo-500/30">ATS {{ resume.ats_analysis.score }}%</span>
+                {% endif %}
+              </div>
+              <p class="mt-1 text-sm text-slate-400">Updated {{ resume.updated_at|date:'M d, Y' }}</p>
+            </div>
+            <a href="{% url 'resumes:resume_detail' resume.pk %}" class="rounded-full bg-indigo-500 px-4 py-2 text-sm font-semibold text-white">View analysis</a>
+          </div>
+        </div>
+        {% empty %}
+        <p class="text-slate-400">No resumes yet. Start by creating one.</p>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+  <aside class="space-y-6">
+
+    <div class="rounded-3xl bg-slate-900/80 p-8 glass-card">
+      <h3 class="text-xl font-semibold text-white">Live Actions</h3>
+      <p class="mt-3 text-slate-400">Download ready-to-use resume templates in PDF format for corporate, modern, and minimal styles.</p>
+      {% if latest_resume %}
+      <div class="mt-6 space-y-3">
+        <a href="{% url 'resumes:resume_preview' latest_resume.pk 'corporate' %}" class="block rounded-full bg-indigo-500 px-4 py-3 text-center text-sm font-semibold text-white">Preview Corporate</a>
+        <a href="{% url 'resumes:resume_preview' latest_resume.pk 'modern' %}" class="block rounded-full bg-slate-700 px-4 py-3 text-center text-sm font-semibold text-white">Preview Modern</a>
+        <a href="{% url 'resumes:resume_preview' latest_resume.pk 'minimal' %}" class="block rounded-full bg-slate-700 px-4 py-3 text-center text-sm font-semibold text-white">Preview Minimal</a>
+      </div>
+      {% else %}
+      <div class="mt-6 rounded-3xl border border-slate-800 bg-slate-950/90 p-5 text-slate-300">
+        You need to create at least one resume before exporting PDFs.
+      </div>
+      {% endif %}
+    </div>
+    <div class="rounded-3xl bg-slate-900/80 p-8 glass-card">
+      <h3 class="text-xl font-semibold text-white">Resume preview</h3>
+      <p class="mt-3 text-slate-400">Preview the tailored templates before exporting your resume as a PDF.</p>
+    </div>
+  </aside>
+</div>
+{% endblock %}

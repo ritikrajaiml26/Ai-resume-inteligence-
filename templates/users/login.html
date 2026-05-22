@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% block content %}
+<section class="mx-auto w-full max-w-full rounded-[2rem] bg-slate-900/90 p-8 shadow-2xl shadow-slate-900/40 sm:max-w-xl sm:p-10">
+  <div class="mb-8 space-y-3 text-center">
+    <p class="text-sm uppercase tracking-[0.3em] text-indigo-300">Welcome back</p>
+    <h1 class="text-4xl font-semibold text-white">Login to your dashboard</h1>
+    <p class="text-slate-400">Manage your resumes, analyze job descriptions, and generate ATS-ready content.</p>
+  </div>
+  <form method="post" class="space-y-6">
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+    <div class="space-y-2">
+      <label class="block text-sm font-semibold text-slate-200">Username</label>
+      {{ form.username }}
+      {{ form.username.errors }}
+    </div>
+    <div class="space-y-2">
+      <label class="block text-sm font-semibold text-slate-200">Password</label>
+      {{ form.password }}
+      {{ form.password.errors }}
+    </div>
+    <button type="submit" class="w-full rounded-full bg-gradient-to-r from-indigo-500 to-pink-500 px-6 py-3 text-white transition hover:scale-[1.01]">Login</button>
+  </form>
+  <div class="mt-6 flex items-center justify-between text-sm text-slate-400">
+    <p>No account yet? <a href="{% url 'users:register' %}" class="text-indigo-300 hover:text-indigo-200">Create one</a>.</p>
+    <a href="{% url 'users:password_reset' %}" class="text-indigo-300 hover:text-indigo-200">Forgot password?</a>
+  </div>
+</section>
+{% endblock %}

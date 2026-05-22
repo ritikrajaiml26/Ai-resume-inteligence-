@@ -1,0 +1,67 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Resume Intelligence Platform</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="{% static 'css/custom.css' %}">
+    <script src="{% static 'js/main.js' %}" defer></script>
+</head>
+<body class="bg-slate-950 text-slate-100 font-inter">
+<header class="border-b border-slate-800 bg-slate-950/90 backdrop-blur sticky top-0 z-50">
+  <div class="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
+    <a href="{% url 'users:landing' %}" class="text-xl font-bold tracking-tight text-white">AI Resume Intelligence</a>
+    <div class="hidden md:flex items-center gap-4 text-sm text-slate-300">
+      {% if request.user.is_authenticated %}
+      <a href="{% url 'users:dashboard' %}" class="hover:text-white">Dashboard</a>
+      <a href="{% url 'resumes:resume_create' %}" class="hover:text-white">Create Resume</a>
+      {% if request.user.is_staff %}
+      <a href="/admin/" class="hover:text-white">Admin</a>
+      {% endif %}
+      <a href="{% url 'users:logout' %}" class="rounded-full bg-indigo-500 px-4 py-2 text-white transition hover:bg-indigo-400">Logout</a>
+      <a href="{% url 'users:profile' %}" class="ml-2 flex h-8 w-8 items-center justify-center rounded-full bg-slate-800 text-lg transition hover:bg-slate-700" title="Profile Settings">👤</a>
+      {% else %}
+      <a href="{% url 'users:login' %}" class="hover:text-white">Login</a>
+      <a href="{% url 'users:admin_login' %}" class="hover:text-white">Admin Login</a>
+      <a href="{% url 'users:register' %}" class="rounded-full bg-indigo-500 px-4 py-2 text-white transition hover:bg-indigo-400">Register</a>
+      {% endif %}
+    </div>
+    <button id="mobile-menu-button" class="md:hidden text-slate-200 hover:text-white focus:outline-none">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+      </svg>
+    </button>
+  </div>
+  <div id="mobile-menu" class="hidden border-t border-slate-800 bg-slate-950/95 md:hidden">
+    <div class="space-y-2 px-6 py-4 text-slate-300">
+      {% if request.user.is_authenticated %}
+      <a href="{% url 'users:dashboard' %}" class="block hover:text-white">Dashboard</a>
+      <a href="{% url 'resumes:resume_create' %}" class="block hover:text-white">Create Resume</a>
+      {% if request.user.is_staff %}
+      <a href="/admin/" class="block hover:text-white">Admin</a>
+      {% endif %}
+      <a href="{% url 'users:logout' %}" class="block rounded-full bg-indigo-500 px-4 py-2 text-white hover:bg-indigo-400">Logout</a>
+      {% else %}
+      <a href="{% url 'users:login' %}" class="block hover:text-white">Login</a>
+      <a href="{% url 'users:admin_login' %}" class="block hover:text-white">Admin Login</a>
+      <a href="{% url 'users:register' %}" class="block rounded-full bg-indigo-500 px-4 py-2 text-white hover:bg-indigo-400">Register</a>
+      {% endif %}
+    </div>
+  </div>
+</header>
+<main class="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(99,102,241,0.16),_transparent_32%),radial-gradient(circle_at_bottom_right,_rgba(236,72,153,0.15),_transparent_30%),#020617] text-white">
+  <div class="mx-auto max-w-7xl px-6 py-10">
+    {% block content %}{% endblock %}
+  </div>
+</main>
+<footer class="border-t border-slate-800 bg-slate-950/90 py-6 text-slate-400">
+  <div class="mx-auto flex max-w-7xl flex-col items-center justify-between px-6 gap-4 text-sm md:flex-row">
+    <p>© 2026 AI Resume Intelligence Platform. Built with Django and AI.</p>
+    <p>Secure resume optimization and ATS analytics for modern careers.</p>
+  </div>
+</footer>
+</body>
+</html>

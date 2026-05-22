@@ -1,0 +1,88 @@
+<div style="font-family: 'Times New Roman', Times, serif; color: #000; line-height: 1.3; background: #fff; padding: 40px; min-height: 1100px;">
+  <!-- Header -->
+  <header style="text-align: center; margin-bottom: 25px;">
+    <h1 style="font-size: 20pt; font-weight: bold; margin: 0; text-transform: uppercase;">{{ resume.full_name|default:resume.user.get_full_name|default:resume.user.username|upper }}</h1>
+    <div style="font-size: 10pt; margin-top: 5px; color: #000;">
+      <span style="text-decoration: underline; color: #0000EE;">{{ resume.contact_phone }}</span> | 
+      <span style="text-decoration: underline; color: #0000EE;">{{ resume.contact_email }}</span> | 
+      <strong>LinkedIn:</strong> <span style="text-decoration: underline; color: #0000EE;">{{ resume.linkedin_url|default:"linkedin.com/in/user" }}</span> | 
+      <strong>GitHub:</strong> <span style="text-decoration: underline; color: #0000EE;">{{ resume.github_url|default:"github.com/user" }}</span>
+    </div>
+  </header>
+
+  <!-- PROFILE SUMMARY -->
+  <section style="margin-bottom: 20px;">
+    <h3 style="font-size: 11pt; font-weight: bold; color: #2E75B6; margin: 0 0 5px 0; text-transform: uppercase; border-bottom: 1.5pt solid #8EA9DB; padding-bottom: 2px;">PROFILE SUMMARY</h3>
+    <p style="font-size: 10pt; margin: 8px 0 0 0; text-align: justify;">
+      {{ resume.summary }}
+    </p>
+  </section>
+
+  <!-- EDUCATION -->
+  <section style="margin-bottom: 20px;">
+    <h3 style="font-size: 11pt; font-weight: bold; color: #2E75B6; margin: 0 0 5px 0; text-transform: uppercase; border-bottom: 1.5pt solid #8EA9DB; padding-bottom: 2px;">EDUCATION</h3>
+    {% for edu in resume.educations.all %}
+    <div style="margin-top: 8px; font-size: 10pt;">
+      <div style="display: flex; justify-content: space-between; font-weight: bold;">
+        <span>{{ edu.degree }} <span style="font-weight: normal;">({{ edu.description|default:"" }})</span></span>
+        <span>Year: {{ edu.start_date|slice:":4" }} — {{ edu.end_date|slice:":4" }}</span>
+      </div>
+      <div style="display: flex; justify-content: space-between;">
+        <span style="font-weight: bold;">{{ edu.institution }}</span>
+        {% if forloop.first %}<span>CGPA : 8.1</span>{% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  </section>
+
+  <!-- EXPERIENCE -->
+  <section style="margin-bottom: 20px;">
+    <h3 style="font-size: 11pt; font-weight: bold; color: #2E75B6; margin: 0 0 5px 0; text-transform: uppercase; border-bottom: 1.5pt solid #8EA9DB; padding-bottom: 2px;">EXPERIENCE</h3>
+    {% for exp in resume.experiences.all %}
+    <div style="margin-top: 8px; font-size: 10pt;">
+      <p style="margin: 0; font-weight: bold;">{{ exp.role }} — <span style="font-weight: normal;">{{ exp.company }}, {{ exp.location }}</span></p>
+      <p style="margin: 2px 0; font-style: italic; color: #333;">{{ exp.duration }}</p>
+      <div style="margin-top: 5px; padding-left: 15px;">
+        {{ exp.bullets|linebreaks }}
+      </div>
+    </div>
+    {% endfor %}
+  </section>
+
+  <!-- PROJECTS -->
+  <section style="margin-bottom: 20px;">
+    <h3 style="font-size: 11pt; font-weight: bold; color: #2E75B6; margin: 0 0 5px 0; text-transform: uppercase; border-bottom: 1.5pt solid #8EA9DB; padding-bottom: 2px;">PROJECTS</h3>
+    {% for project in resume.projects.all %}
+    <div style="margin-top: 8px; font-size: 10pt;">
+      <p style="margin: 0; font-weight: bold;">{{ project.title }} — <span style="font-weight: normal;">{{ project.technologies }}</span></p>
+      <p style="margin: 4px 0 0 0; text-align: justify;">{{ project.description }}</p>
+    </div>
+    {% endfor %}
+  </section>
+
+  <!-- SKILLS -->
+  <section style="margin-bottom: 20px;">
+    <h3 style="font-size: 11pt; font-weight: bold; color: #2E75B6; margin: 0 0 5px 0; text-transform: uppercase; border-bottom: 1.5pt solid #8EA9DB; padding-bottom: 2px;">SKILLS</h3>
+    <div style="margin-top: 8px; font-size: 10pt; display: grid; gap: 5px;">
+      <p style="margin: 0;"><strong>Programming Languages :</strong> Python, SQL</p>
+      <p style="margin: 0;"><strong>Web & Frameworks :</strong> HTML, CSS, Django, Django REST Framework</p>
+      <p style="margin: 0;"><strong>Artificial Intelligence & Data Tools :</strong> Machine Learning, Pandas, NumPy</p>
+      <p style="margin: 0;"><strong>Database & Data Handling:</strong> MySQL, Oracle, SQLite</p>
+      <p style="margin: 0;"><strong>Core Computer Science:</strong> OOPS, Data Structures, DBMS, SDLC, Problem Solving</p>
+    </div>
+  </section>
+
+  <!-- CERTIFICATION -->
+  <section>
+    <h3 style="font-size: 11pt; font-weight: bold; color: #2E75B6; margin: 0 0 5px 0; text-transform: uppercase; border-bottom: 1.5pt solid #8EA9DB; padding-bottom: 2px;">CERTIFICATION</h3>
+    <table style="width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 10pt;">
+      {% for cert in resume.certifications.all %}
+      <tr>
+        <td style="padding: 2px 0; width: 30px; vertical-align: top;">{{ forloop.counter }}.</td>
+        <td style="padding: 2px 0; vertical-align: top;">{{ cert.title }}</td>
+        <td style="padding: 2px 0; text-align: right; color: #333; vertical-align: top;">{{ cert.issuer }} ({{ cert.year }})</td>
+      </tr>
+      {% endfor %}
+    </table>
+  </section>
+</div>

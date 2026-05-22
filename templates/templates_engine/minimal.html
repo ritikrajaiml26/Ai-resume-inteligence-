@@ -1,0 +1,71 @@
+<div style="font-family:'Georgia', serif; background:#ffffff; color:#1a1a1a; padding:60px; line-height:1.5; max-width:900px; margin:auto;">
+  <!-- Minimalist Header -->
+  <header style="text-align:center; border-bottom:1px solid #1a1a1a; padding-bottom:30px; margin-bottom:40px;">
+    <h1 style="font-size:32px; font-weight:400; margin:0; letter-spacing:4px; text-transform:uppercase;">{{ resume.full_name|default:resume.user.get_full_name|default:resume.user.username|title }}</h1>
+    <h2 style="font-size:16px; font-weight:400; margin:10px 0 20px; color:#666; letter-spacing:2px; text-transform:uppercase;">{{ resume.title }}</h2>
+    <div style="font-size:13px; color:#444; letter-spacing:1px;">
+      {{ resume.contact_email }} &nbsp;•&nbsp; {{ resume.contact_phone }}
+      {% if resume.linkedin_url %} &nbsp;•&nbsp; {{ resume.linkedin_url }}{% endif %}
+    </div>
+  </header>
+
+  <!-- Summary -->
+  <section style="margin-bottom:40px;">
+    <p style="margin:0; font-style:italic; color:#333; text-align:center; font-size:15px; line-height:1.7;">{{ resume.summary }}</p>
+  </section>
+
+  <!-- Skills -->
+  <section style="margin-bottom:40px;">
+    <h3 style="font-size:14px; font-weight:700; text-transform:uppercase; border-bottom:1px solid #eee; padding-bottom:5px; margin-bottom:15px; letter-spacing:2px;">Skills</h3>
+    <p style="margin:0; color:#444; font-size:14px; letter-spacing:0.5px;">
+      {% for skill in resume.skills.all %}{{ skill.name }}{% if not forloop.last %} &nbsp;·&nbsp; {% endif %}{% endfor %}
+    </p>
+  </section>
+
+  <!-- Experience -->
+  <section style="margin-bottom:40px;">
+    <h3 style="font-size:14px; font-weight:700; text-transform:uppercase; border-bottom:1px solid #eee; padding-bottom:5px; margin-bottom:20px; letter-spacing:2px;">Professional Experience</h3>
+    {% for exp in resume.experiences.all %}
+    <div style="margin-bottom:25px;">
+      <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
+        <span style="font-weight:700; font-size:15px;">{{ exp.role }}</span>
+        <span style="font-size:13px; color:#666;">{{ exp.duration }}</span>
+      </div>
+      <p style="margin:0 0 10px; font-style:italic; font-size:14px; color:#444;">{{ exp.company }}, {{ exp.location }}</p>
+      <div style="color:#333; font-size:14px; text-align:justify;">
+        {{ exp.bullets|linebreaks }}
+      </div>
+    </div>
+    {% endfor %}
+  </section>
+
+  <!-- Education -->
+  <section style="margin-bottom:40px;">
+    <h3 style="font-size:14px; font-weight:700; text-transform:uppercase; border-bottom:1px solid #eee; padding-bottom:5px; margin-bottom:15px; letter-spacing:2px;">Education</h3>
+    {% for edu in resume.educations.all %}
+    <div style="margin-bottom:15px;">
+      <div style="display:flex; justify-content:space-between;">
+        <span style="font-weight:700; font-size:14px;">{{ edu.degree }}</span>
+        <span style="font-size:13px; color:#666;">{{ edu.start_date }} - {{ edu.end_date }}</span>
+      </div>
+      <p style="margin:2px 0 0; color:#444; font-size:14px;">{{ edu.institution }}</p>
+    </div>
+    {% endfor %}
+  </section>
+
+  <!-- Projects & Certs -->
+  {% if resume.projects.exists or resume.certifications.exists %}
+  <section>
+    <h3 style="font-size:14px; font-weight:700; text-transform:uppercase; border-bottom:1px solid #eee; padding-bottom:5px; margin-bottom:15px; letter-spacing:2px;">Achievements & Projects</h3>
+    {% for project in resume.projects.all %}
+    <div style="margin-bottom:15px;">
+      <p style="margin:0; font-weight:700; font-size:14px;">{{ project.title }} <span style="font-weight:400; color:#666; font-size:12px;">({{ project.technologies }})</span></p>
+      <p style="margin:4px 0 0; color:#333; font-size:13px;">{{ project.description }}</p>
+    </div>
+    {% endfor %}
+    {% for cert in resume.certifications.all %}
+    <p style="margin:0 0 8px; font-size:14px;"><strong>{{ cert.title }}</strong> &nbsp;—&nbsp; {{ cert.issuer }}, {{ cert.year }}</p>
+    {% endfor %}
+  </section>
+  {% endif %}
+</div>

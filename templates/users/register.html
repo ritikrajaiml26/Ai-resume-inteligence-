@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% block content %}
+<section class="mx-auto w-full max-w-full rounded-[2rem] bg-slate-900/90 p-8 shadow-2xl shadow-slate-900/40 sm:max-w-xl sm:p-10">
+  <div class="mb-8 space-y-3 text-center">
+    <p class="text-sm uppercase tracking-[0.3em] text-indigo-300">Join AI Resume Intelligence</p>
+    <h1 class="text-4xl font-semibold text-white">Create your account</h1>
+    <p class="text-slate-400">Start building modern resumes and analyzing job descriptions with AI.</p>
+  </div>
+  <form method="post" class="space-y-6">
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+    <div class="space-y-2">
+      <label class="block text-sm font-semibold text-slate-200">Full name</label>
+      {{ form.full_name }}
+      {{ form.full_name.errors }}
+    </div>
+    <div class="space-y-2">
+      <label class="block text-sm font-semibold text-slate-200">Username</label>
+      {{ form.username }}
+      {{ form.username.errors }}
+    </div>
+    <div class="space-y-2">
+      <label class="block text-sm font-semibold text-slate-200">Email</label>
+      {{ form.email }}
+      {{ form.email.errors }}
+    </div>
+    <div class="space-y-2">
+      <label class="block text-sm font-semibold text-slate-200">Password</label>
+      {{ form.password1 }}
+      {{ form.password1.errors }}
+    </div>
+    <div class="space-y-2">
+      <label class="block text-sm font-semibold text-slate-200">Password confirmation</label>
+      {{ form.password2 }}
+      {{ form.password2.errors }}
+    </div>
+    <button type="submit" class="w-full rounded-full bg-gradient-to-r from-indigo-500 to-pink-500 px-6 py-3 text-white transition hover:scale-[1.01]">Register</button>
+  </form>
+  <p class="mt-6 text-center text-sm text-slate-400">Already registered? <a href="{% url 'users:login' %}" class="text-indigo-300 hover:text-indigo-200">Login</a>.</p>
+</section>
+{% endblock %}

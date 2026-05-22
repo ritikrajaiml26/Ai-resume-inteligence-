@@ -1,0 +1,226 @@
+{% extends 'base.html' %}
+{% load resume_extras %}
+{% block content %}
+<div class="grid gap-8 xl:grid-cols-[0.9fr_0.7fr]">
+  <section class="space-y-8">
+    <div class="rounded-3xl bg-slate-900/85 p-8 glass-card">
+      <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <p class="text-sm uppercase tracking-[0.3em] text-indigo-300">Resume review</p>
+          <h1 class="mt-2 text-3xl font-semibold text-white">{{ resume.title }}</h1>
+        </div>
+        <div class="flex flex-wrap gap-3">
+          <a href="{% url 'resumes:resume_preview' resume.pk 'corporate' %}" class="rounded-full bg-slate-800 px-4 py-2 text-sm text-slate-200 hover:bg-slate-700">Preview corporate</a>
+          <a href="{% url 'resumes:resume_preview' resume.pk 'modern' %}" class="rounded-full bg-slate-800 px-4 py-2 text-sm text-slate-200 hover:bg-slate-700">Preview modern</a>
+          <a href="{% url 'resumes:resume_preview' resume.pk 'minimal' %}" class="rounded-full bg-slate-800 px-4 py-2 text-sm text-slate-200 hover:bg-slate-700">Preview minimal</a>
+        </div>
+      </div>
+      <div class="mt-8 grid gap-4 md:grid-cols-3">
+        <div class="rounded-3xl bg-slate-950/80 p-5">
+          <p class="text-sm text-slate-400">Contacts</p>
+          <p class="mt-3 text-white">{{ resume.contact_email }}</p>
+          <p class="text-slate-400">{{ resume.contact_phone }}</p>
+        </div>
+        <div class="rounded-3xl bg-slate-950/80 p-5">
+          <p class="text-sm text-slate-400">Template</p>
+          <p class="mt-3 text-white">{{ resume.get_template_style_display }}</p>
+        </div>
+        <div class="rounded-3xl bg-slate-950/80 p-5">
+          <p class="text-sm text-slate-400">Last edited</p>
+          <p class="mt-3 text-white">{{ resume.updated_at|date:'M d, Y' }}</p>
+        </div>
+      </div>
+    </div>
+    <div class="rounded-3xl bg-slate-900/85 p-8 glass-card">
+      <h2 class="text-2xl font-semibold text-white">Job Description Analyzer</h2>
+      <p class="mt-3 text-slate-400">Paste the target job description to compute keywords and ATS recommendations.</p>
+      <form method="post" class="mt-6 space-y-6">
+        {% csrf_token %}
+        {{ jd_form.non_field_errors }}
+        <div>
+          {{ jd_form.title.label_tag }}
+          {{ jd_form.title }}
+        </div>
+        <div>
+          {{ jd_form.description.label_tag }}
+          {{ jd_form.description }}
+        </div>
+        <button type="submit" class="rounded-full bg-gradient-to-r from-indigo-500 to-pink-500 px-8 py-3 text-white transition hover:scale-[1.01]">Analyze JD</button>
+      </form>
+    </div>
+    {% if resume.ats_analysis %}
+    <div class="rounded-3xl bg-slate-900/85 p-8 glass-card">
+      <div class="flex flex-col gap-8 md:flex-row md:items-center">
+        <!-- ATS Score Meter -->
+        <div class="relative flex h-40 w-40 items-center justify-center rounded-full border-8 border-slate-800 bg-slate-950/90 shadow-2xl">
+          <svg class="absolute inset-0 h-full w-full -rotate-90">
+            <circle cx="80" cy="80" r="72" stroke="currentColor" stroke-width="8" fill="transparent" class="text-indigo-500/20" />
+            <circle cx="80" cy="80" r="72" stroke="currentColor" stroke-width="8" fill="transparent" stroke-dasharray="452" stroke-dashoffset="{{ 452|add:resume.ats_analysis.score|multiply:-4.52|floatformat:0 }}" class="text-indigo-500 transition-all duration-1000" />
+          </svg>
+          <div class="text-center">
+            <span class="text-4xl font-bold text-white">{{ resume.ats_analysis.score }}%</span>
+            <p class="text-xs text-slate-400">ATS Score</p>
+          </div>
+        </div>
+        
+        <div class="flex-1">
+          <p class="text-sm uppercase tracking-[0.3em] text-indigo-300">Analysis Highlights</p>
+          <h2 class="mt-2 text-2xl font-semibold text-white">Keyword Match: {{ resume.ats_analysis.keyword_match }}%</h2>
+          <p class="mt-3 text-slate-400">Your resume has been analyzed against the provided Job Description using our AI engine.</p>
+        </div>
+      </div>
+
+      <div class="mt-12 grid gap-6 sm:grid-cols-2">
+        <div class="rounded-3xl bg-slate-950/80 p-6">
+          <h3 class="text-lg font-semibold text-indigo-300">Project Impact Analyzer</h3>
+          <div class="mt-4 prose prose-invert prose-sm text-slate-300">
+            {{ resume.ats_analysis.project_impact_analysis|linebreaks }}
+          </div>
+        </div>
+        <div class="rounded-3xl bg-slate-950/80 p-6">
+          <h3 class="text-lg font-semibold text-pink-400">Missing keywords</h3>
+          <div class="mt-4 flex flex-wrap gap-2">
+            {% for skill in resume.ats_analysis.missing_skills %}
+            <span class="rounded-full bg-slate-800 px-3 py-1 text-xs text-slate-300 border border-slate-700">{{ skill }}</span>
+            {% empty %}
+            <span class="text-slate-500">No missing skills detected</span>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-8 grid gap-6 sm:grid-cols-2">
+        <div class="rounded-3xl bg-slate-950/80 p-6">
+          <h3 class="text-lg font-semibold text-white">Weak sections</h3>
+          <ul class="mt-4 space-y-3">
+            {% for section in resume.ats_analysis.weak_sections %}
+            <li class="flex items-center gap-3 text-slate-300">
+              <span class="h-2 w-2 rounded-full bg-red-500"></span>
+              {{ section }}
+            </li>
+            {% empty %}
+            <li class="text-slate-500 italic">All sections look strong</li>
+            {% endfor %}
+          </ul>
+        </div>
+        <div class="rounded-3xl bg-slate-950/80 p-6">
+          <h3 class="text-lg font-semibold text-white">Suggestions</h3>
+          <ul class="mt-4 space-y-3">
+            {% for suggestion in resume.ats_analysis.suggestions %}
+            <li class="flex items-center gap-3 text-slate-300">
+              <span class="h-2 w-2 rounded-full bg-green-500"></span>
+              {{ suggestion }}
+            </li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- Version History -->
+    <div class="rounded-3xl bg-slate-900/85 p-8 glass-card">
+      <h2 class="text-2xl font-semibold text-white">Optimization History</h2>
+      <div class="mt-6 space-y-4">
+        {% for version in resume.versions.all|dictsortreversed:"created_at" %}
+        <div class="flex items-center justify-between rounded-3xl border border-slate-800 bg-slate-950/90 p-5">
+          <div>
+            <p class="font-semibold text-white">Version {{ forloop.revcounter }}</p>
+            <p class="text-xs text-slate-500">{{ version.created_at|date:"M d, Y H:i" }}</p>
+          </div>
+          <span class="rounded-full bg-slate-800 px-3 py-1 text-xs text-slate-400">Snapshot Saved</span>
+        </div>
+        {% empty %}
+        <p class="text-slate-500 italic">No optimization history yet. Run an analysis to save a version.</p>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+  <aside class="space-y-6">
+    <div class="rounded-3xl bg-slate-900/85 p-8 glass-card">
+      <h3 class="text-xl font-semibold text-white">Live Actions</h3>
+      <p class="mt-3 text-slate-400">Download ready-to-use resume templates in PDF format for corporate, modern, and minimal styles.</p>
+      <div class="mt-6 space-y-3">
+        <a href="{% url 'resumes:resume_preview' resume.pk 'corporate' %}" class="block rounded-full bg-indigo-500 px-4 py-3 text-center text-sm font-semibold text-white">Preview Corporate</a>
+        <a href="{% url 'resumes:resume_preview' resume.pk 'modern' %}" class="block rounded-full bg-slate-700 px-4 py-3 text-center text-sm font-semibold text-white">Preview Modern</a>
+        <a href="{% url 'resumes:resume_preview' resume.pk 'minimal' %}" class="block rounded-full bg-slate-700 px-4 py-3 text-center text-sm font-semibold text-white">Preview Minimal</a>
+      </div>
+    </div>
+    <div class="rounded-3xl bg-slate-900/85 p-8 glass-card">
+      <h3 class="text-xl font-semibold text-white">AI Resume Editor Chat</h3>
+      <p class="mt-2 text-sm text-slate-400">Ask Gemini to change anything. Example: "Update my summary to focus more on Backend" or "Add React to my skills".</p>
+      
+      <div id="chat-window" class="mt-6 h-60 overflow-y-auto rounded-2xl bg-slate-950/50 p-4 text-sm text-slate-300 space-y-4">
+        <div class="rounded-2xl bg-indigo-500/10 p-3 text-indigo-200">
+          Hello! I'm your AI Resume Editor. What would you like to change in your resume?
+        </div>
+      </div>
+      
+      <div class="mt-4 flex gap-2">
+        <input type="text" id="chat-input" class="flex-1 rounded-full border border-slate-700 bg-slate-950 px-4 py-2 text-sm text-white focus:border-indigo-500 outline-none" placeholder="Type your request...">
+        <button id="chat-send" class="rounded-full bg-indigo-600 p-2 text-white hover:bg-indigo-500">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+            <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
+          </svg>
+        </button>
+      </div>
+    </div>
+    
+    <script>
+      const chatWindow = document.getElementById('chat-window');
+      const chatInput = document.getElementById('chat-input');
+      const chatSend = document.getElementById('chat-send');
+      
+      function appendMessage(msg, isUser=false) {
+        const div = document.createElement('div');
+        div.className = isUser ? 'rounded-2xl bg-slate-800 p-3 text-right text-white self-end ml-auto' : 'rounded-2xl bg-indigo-500/10 p-3 text-indigo-200';
+        div.textContent = msg;
+        chatWindow.appendChild(div);
+        chatWindow.scrollTop = chatWindow.scrollHeight;
+      }
+      
+      chatSend.addEventListener('click', async () => {
+        const msg = chatInput.value.trim();
+        if(!msg) return;
+        
+        appendMessage(msg, true);
+        chatInput.value = '';
+        
+        try {
+          const response = await fetch('{% url "resumes:resume_chat" resume.pk %}', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({ message: msg })
+          });
+          
+          const data = await response.json();
+          if(data.explanation) {
+            appendMessage(data.explanation);
+            setTimeout(() => {
+              if(confirm("Resume updated! Would you like to refresh the page to see changes?")) {
+                window.location.reload();
+              }
+            }, 500);
+          } else if(data.error) {
+            appendMessage("Error: " + data.error);
+          }
+        } catch (e) {
+          appendMessage("Error connecting to server.");
+        }
+      });
+      
+      chatInput.addEventListener('keypress', (e) => {
+        if(e.key === 'Enter') chatSend.click();
+      });
+    </script>
+    
+    <div class="rounded-3xl bg-slate-900/85 p-8 glass-card">
+      <h3 class="text-xl font-semibold text-white">Resume preview</h3>
+      <p class="mt-3 text-slate-400">Preview the tailored templates before exporting your resume as a PDF.</p>
+    </div>
+  </aside>
+</div>
+{% endblock %}
