@@ -30,6 +30,7 @@ class Education(models.Model):
     start_date = models.DateField(null=True, blank=True)
     end_date = models.DateField(null=True, blank=True)
     description = models.TextField(blank=True)
+    year = models.CharField(max_length=100, blank=True) # Added
 
 class Skill(models.Model):
     resume = models.ForeignKey(Resume, on_delete=models.CASCADE, related_name='skills')
@@ -41,15 +42,33 @@ class Experience(models.Model):
     company = models.CharField(max_length=255)
     role = models.CharField(max_length=255)
     location = models.CharField(max_length=255, blank=True)
+    duration = models.CharField(max_length=255, blank=True) # Added
     start_date = models.DateField(null=True, blank=True)
     end_date = models.DateField(null=True, blank=True)
     description = models.TextField(blank=True)
 
+    @property
+    def bullets(self):
+        return self.description
+
+    @bullets.setter
+    def bullets(self, value):
+        self.description = value
+
 class Project(models.Model):
     resume = models.ForeignKey(Resume, on_delete=models.CASCADE, related_name='projects')
     name = models.CharField(max_length=255)
+    technologies = models.CharField(max_length=255, blank=True) # Added
     description = models.TextField(blank=True)
     link = models.URLField(blank=True)
+
+    @property
+    def title(self):
+        return self.name
+
+    @title.setter
+    def title(self, value):
+        self.name = value
 
 class Certification(models.Model):
     resume = models.ForeignKey(Resume, on_delete=models.CASCADE, related_name='certifications')
@@ -58,6 +77,23 @@ class Certification(models.Model):
     license_number = models.CharField(max_length=100, blank=True)
     url = models.URLField(blank=True)
     date_obtained = models.DateField(null=True, blank=True)
+    year = models.CharField(max_length=50, blank=True) # Added
+
+    @property
+    def title(self):
+        return self.name
+
+    @title.setter
+    def title(self, value):
+        self.name = value
+
+    @property
+    def issuer(self):
+        return self.authority
+
+    @issuer.setter
+    def issuer(self, value):
+        self.authority = value
 
 class Achievement(models.Model):
     resume = models.ForeignKey(Resume, on_delete=models.CASCADE, related_name='achievements')

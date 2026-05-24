@@ -27,7 +27,7 @@ def parse_manual_fields(resume, form):
     for name in [item.strip() for item in skills_raw.split(',') if item.strip()]:
         Skill.objects.create(resume=resume, name=name)
 
-    # Education: Degree | Institution | Start | End | Description
+    # Education: Degree | Institution | Year | Description
     education_lines = [l.strip() for l in form.cleaned_data.get('education_raw', '').splitlines() if l.strip()]
     for line in education_lines:
         parts = [p.strip() for p in line.split('|')]
@@ -35,10 +35,11 @@ def parse_manual_fields(resume, form):
             resume=resume,
             degree=parts[0] if len(parts) > 0 else '',
             institution=parts[1] if len(parts) > 1 else '',
-            description=parts[2] if len(parts) > 2 else '',
+            year=parts[2] if len(parts) > 2 else '',
+            description=parts[3] if len(parts) > 3 else '',
         )
 
-    # Experience: Role | Company | Location | Description
+    # Experience: Role | Company | Duration | Location | Description
     experience_lines = [l.strip() for l in form.cleaned_data.get('experience_raw', '').splitlines() if l.strip()]
     for line in experience_lines:
         parts = [p.strip() for p in line.split('|')]
@@ -46,22 +47,23 @@ def parse_manual_fields(resume, form):
             resume=resume,
             role=parts[0] if len(parts) > 0 else '',
             company=parts[1] if len(parts) > 1 else '',
-            location=parts[2] if len(parts) > 2 else '',
-            description=parts[3] if len(parts) > 3 else '',
+            duration=parts[2] if len(parts) > 2 else '',
+            location=parts[3] if len(parts) > 3 else '',
+            description=parts[4] if len(parts) > 4 else '',
         )
 
-    # Projects: Name | Description | Link
+    # Projects: Title | Technologies | Description
     project_lines = [l.strip() for l in form.cleaned_data.get('projects_raw', '').splitlines() if l.strip()]
     for line in project_lines:
         parts = [p.strip() for p in line.split('|')]
         Project.objects.create(
             resume=resume,
             name=parts[0] if len(parts) > 0 else '',
-            description=parts[1] if len(parts) > 1 else '',
-            link=parts[2] if len(parts) > 2 else '',
+            technologies=parts[1] if len(parts) > 1 else '',
+            description=parts[2] if len(parts) > 2 else '',
         )
 
-    # Certifications: Name | Authority | Date
+    # Certifications: Title | Issuer | Year
     certification_lines = [l.strip() for l in form.cleaned_data.get('certifications_raw', '').splitlines() if l.strip()]
     for line in certification_lines:
         parts = [p.strip() for p in line.split('|')]
@@ -69,6 +71,7 @@ def parse_manual_fields(resume, form):
             resume=resume,
             name=parts[0] if len(parts) > 0 else '',
             authority=parts[1] if len(parts) > 1 else '',
+            year=parts[2] if len(parts) > 2 else '',
         )
 
     # Achievements: one per line
@@ -88,7 +91,7 @@ def resume_create(request):
 
             # Optionally enhance summary with AI
             ai = AIEngine()
-            if resume.summary:
+            if resume.summary and len(resume.summary.strip()) > 20 and "I don't see" not in resume.summary:
                 ai.improve_summary(resume)
             else:
                 summaries = ai.generate_summaries(resume)
@@ -113,7 +116,7 @@ def manual_builder(request):
 
             # Optionally enhance with AI
             ai = AIEngine()
-            if not resume.summary:
+            if not resume.summary or len(resume.summary.strip()) < 20 or "I don't see" in resume.summary:
                 summaries = ai.generate_summaries(resume)
                 resume.summary = summaries.get('professional', '')
                 resume.save()

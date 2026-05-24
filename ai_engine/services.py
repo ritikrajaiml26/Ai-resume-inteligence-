@@ -102,15 +102,30 @@ class AIEngine:
 
     def generate_summaries(self, resume: Resume):
         skill_names = ', '.join([skill.name for skill in resume.skills.all()])
-        prompts = {
-            'professional': f"Write a compelling professional summary for this resume:\n{resume.summary}",
-            'role_based': f"Create a focused role-based introduction for a resume targeting the position: {resume.title}",
-            'ats_optimized': f"Write an ATS-optimized resume summary for a candidate with these skills: {skill_names}.",
+        projects = '; '.join([f"{p.name}: {p.description}" for p in resume.projects.all()])
+        experiences = '; '.join([f"{e.role} at {e.company}: {e.description}" for e in resume.experiences.all()])
+
+        prompt = (
+            f"Generate a professional, ATS-optimized resume summary of exactly 50 words for {resume.full_name or 'the candidate'}.\n"
+            f"Target Role/Title: {resume.title}\n"
+            f"Skills: {skill_names or 'Not specified'}\n"
+            f"Projects: {projects or 'None'}\n"
+            f"Experience: {experiences or 'None'}\n\n"
+            f"Instructions:\n"
+            f"1. Write a professional, high-impact summary of around 45 to 55 words.\n"
+            f"2. Focus on the candidate's skills and projects to show high technical competence.\n"
+            f"3. Return ONLY the summary text, no explanations, no headers, no intro, no markdown."
+        )
+
+        summary = self._call_groq(prompt).strip()
+        # Clean any potential quotes or markdown
+        summary = re.sub(r'^["\'`]+|["\'`]+$', '', summary).strip()
+
+        return {
+            'professional': summary,
+            'role_based': summary,
+            'ats_optimized': summary
         }
-        results = {}
-        for key, prompt in prompts.items():
-            results[key] = self._call_groq(prompt).strip()
-        return results
 
     def analyze_project_impact(self, resume: Resume):
         projects = []

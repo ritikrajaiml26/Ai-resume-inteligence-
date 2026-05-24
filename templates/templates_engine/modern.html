@@ -72,7 +72,7 @@
         <div style="margin-bottom:20px;">
           <p style="margin:0; font-weight:700; color:#1e293b; font-size:15px;">{{ edu.degree }}</p>
           <p style="margin:2px 0; color:#4f46e5; font-weight:600; font-size:13px;">{{ edu.institution }}</p>
-          <p style="margin:0; color:#64748b; font-size:12px;">{{ edu.start_date }} - {{ edu.end_date }}</p>
+          <p style="margin:0; color:#64748b; font-size:12px;">{{ edu.year|default:edu.start_date }}</p>
         </div>
         {% endfor %}
       </section>

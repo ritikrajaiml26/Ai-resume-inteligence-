@@ -25,7 +25,7 @@
     <div style="margin-top: 8px; font-size: 10pt;">
       <div style="display: flex; justify-content: space-between; font-weight: bold;">
         <span>{{ edu.degree }} <span style="font-weight: normal;">({{ edu.description|default:"" }})</span></span>
-        <span>Year: {{ edu.start_date|slice:":4" }} — {{ edu.end_date|slice:":4" }}</span>
+        <span>Year: {{ edu.year|default:edu.start_date }}</span>
       </div>
       <div style="display: flex; justify-content: space-between;">
         <span style="font-weight: bold;">{{ edu.institution }}</span>
