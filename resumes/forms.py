@@ -39,11 +39,20 @@ class ManualResumeForm(forms.ModelForm):
         }
 
 
-class JobDescriptionForm(forms.ModelForm):
-    class Meta:
-        model = JobDescription
-        fields = ['title', 'description']
-        widgets = {
-            'title': forms.TextInput(attrs={'class': 'input-field', 'placeholder': 'Job title or position name'}),
-            'description': forms.Textarea(attrs={'class': 'input-field', 'placeholder': 'Paste the job description here', 'rows': 6}),
-        }
+class JobDescriptionForm(forms.Form):
+    description = forms.CharField(
+        label="Job Description",
+        widget=forms.Textarea(attrs={
+            'class': 'input-field w-full rounded-2xl border border-slate-700 bg-slate-950 p-4 text-white focus:border-indigo-500 outline-none',
+            'placeholder': 'Paste the job description here...',
+            'rows': 6
+        }),
+        required=True
+    )
+    resume_file = forms.FileField(
+        label="Upload Resume (PDF, DOCX, or TXT)",
+        widget=forms.ClearableFileInput(attrs={
+            'class': 'block w-full text-sm text-slate-400 file:mr-4 file:py-2.5 file:px-6 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-600 file:text-white hover:file:bg-indigo-500 cursor-pointer file:cursor-pointer'
+        }),
+        required=True
+    )

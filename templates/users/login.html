@@ -8,17 +8,31 @@
   </div>
   <form method="post" class="space-y-6">
     {% csrf_token %}
-    {{ form.non_field_errors }}
+    
+    {% if form.non_field_errors %}
+      <div class="rounded-xl bg-red-500/10 border border-red-500/20 p-4 text-sm text-red-400 space-y-1">
+        {% for error in form.non_field_errors %}
+          <p class="flex items-center gap-2">⚠️ {{ error }}</p>
+        {% endfor %}
+      </div>
+    {% endif %}
+
     <div class="space-y-2">
-      <label class="block text-sm font-semibold text-slate-200">Username</label>
+      <label class="block text-sm font-semibold text-slate-200">Username or Email</label>
       {{ form.username }}
-      {{ form.username.errors }}
+      {% if form.username.errors %}
+        <p class="text-xs text-red-400 mt-1">{{ form.username.errors.0 }}</p>
+      {% endif %}
     </div>
+    
     <div class="space-y-2">
       <label class="block text-sm font-semibold text-slate-200">Password</label>
       {{ form.password }}
-      {{ form.password.errors }}
+      {% if form.password.errors %}
+        <p class="text-xs text-red-400 mt-1">{{ form.password.errors.0 }}</p>
+      {% endif %}
     </div>
+    
     <button type="submit" class="w-full rounded-full bg-gradient-to-r from-indigo-500 to-pink-500 px-6 py-3 text-white transition hover:scale-[1.01]">Login</button>
   </form>
   <div class="mt-6 flex items-center justify-between text-sm text-slate-400">

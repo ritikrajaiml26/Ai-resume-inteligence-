@@ -2,6 +2,16 @@ import io
 import os
 import json
 import tempfile
+
+try:
+    import pypdf
+except ImportError:
+    pypdf = None
+
+try:
+    import docx
+except ImportError:
+    docx = None
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, Http404, JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
@@ -11,6 +21,37 @@ from .models import Resume, JobDescription, GeneratedResume, Skill, Education, E
 from ai_engine.services import AIEngine
 from ats.services import score_resume
 from templates_engine.services import build_template_html
+
+
+def extract_text_from_file(file_obj):
+    filename = file_obj.name.lower()
+    text = ""
+    try:
+        if filename.endswith('.pdf'):
+            if pypdf is None:
+                raise ImportError("pypdf is not installed in the environment.")
+            reader = pypdf.PdfReader(file_obj)
+            for page in reader.pages:
+                t = page.extract_text()
+                if t:
+                    text += t + "\n"
+        elif filename.endswith('.docx'):
+            if docx is None:
+                raise ImportError("python-docx is not installed in the environment.")
+            doc = docx.Document(file_obj)
+            for para in doc.paragraphs:
+                text += para.text + "\n"
+        else:
+            text = file_obj.read().decode('utf-8', errors='ignore')
+    except Exception as e:
+        print(f"Error extracting text from file: {e}")
+        try:
+            file_obj.seek(0)
+            text = file_obj.read().decode('utf-8', errors='ignore')
+        except:
+            pass
+    return text
+
 
 
 def parse_manual_fields(resume, form):
@@ -134,11 +175,74 @@ def resume_detail(request, pk):
     generated = resume.generated_resumes.order_by('-created_at').first()
 
     if request.method == 'POST':
-        jd_form = JobDescriptionForm(request.POST)
+        jd_form = JobDescriptionForm(request.POST, request.FILES)
         if jd_form.is_valid():
-            job_desc = jd_form.save(commit=False)
-            job_desc.user = request.user
-            job_desc.save()
+            uploaded_file = request.FILES.get('resume_file')
+            description_text = jd_form.cleaned_data['description']
+            
+            # Save file & extract text
+            resume.resume_file = uploaded_file
+            resume.save()
+            resume_text = extract_text_from_file(uploaded_file)
+            
+            # Call AI parser
+            ai = AIEngine()
+            parsed_data = ai.parse_resume_text(resume_text)
+            if parsed_data:
+                # Update basic fields
+                resume.full_name = parsed_data.get('full_name', resume.full_name or '')
+                resume.title = parsed_data.get('title', resume.title or '')
+                resume.summary = parsed_data.get('summary', resume.summary or '')
+                resume.contact_email = parsed_data.get('contact_email', resume.contact_email or '')
+                resume.contact_phone = parsed_data.get('contact_phone', resume.contact_phone or '')
+                resume.save()
+                
+                # Update skills
+                skills = parsed_data.get('skills', [])
+                if skills:
+                    resume.skills.all().delete()
+                    for skill_name in skills:
+                        Skill.objects.create(resume=resume, name=skill_name)
+                
+                # Update experiences
+                experiences = parsed_data.get('experiences', [])
+                if experiences:
+                    resume.experiences.all().delete()
+                    for exp in experiences:
+                        Experience.objects.create(
+                            resume=resume,
+                            role=exp.get('role', ''),
+                            company=exp.get('company', ''),
+                            duration=exp.get('duration', ''),
+                            location=exp.get('location', ''),
+                            description=exp.get('description', ''),
+                        )
+                
+                # Update projects
+                projects = parsed_data.get('projects', [])
+                if projects:
+                    resume.projects.all().delete()
+                    for proj in projects:
+                        Project.objects.create(
+                            resume=resume,
+                            name=proj.get('name', ''),
+                            technologies=proj.get('technologies', ''),
+                            description=proj.get('description', ''),
+                        )
+            else:
+                # Fallback if AI parsing fails
+                if resume_text:
+                    resume.summary = resume_text[:1000]
+                    resume.save()
+            
+            # Create JobDescription
+            job_desc = JobDescription.objects.create(
+                user=request.user,
+                title=resume.title or "Target Role",
+                description=description_text
+            )
+            
+            # Run scoring and redirect
             analysis = score_resume(resume, job_desc)
             return redirect('resumes:resume_detail', pk=resume.pk)
 
@@ -233,7 +337,20 @@ def resume_chat(request, pk):
             return JsonResponse({'error': 'No message provided'}, status=400)
 
         ai = AIEngine()
-        result = ai.chat_edit_resume(resume, message)
+        user_display_name = request.user.first_name or request.user.username
+        
+        # Extract latest job description and missing skills
+        analysis = resume.ats_analyses.order_by('-created_at').first()
+        job_desc_text = analysis.job_description.description if (analysis and analysis.job_description) else ""
+        missing_skills = analysis.missing_keywords if analysis else []
+        
+        result = ai.chat_edit_resume(
+            resume, 
+            message, 
+            user_name=user_display_name, 
+            job_desc=job_desc_text, 
+            missing_skills=missing_skills
+        )
 
         explanation = result.get('explanation', 'Resume updated.')
         updates = result.get('updates', {})

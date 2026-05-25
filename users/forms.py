@@ -82,8 +82,21 @@ class ProfileUpdateForm(forms.ModelForm):
 
 
 class LoginForm(AuthenticationForm):
-    username = forms.CharField(widget=forms.TextInput(attrs={'class': 'input-field', 'placeholder': 'Username'}))
-    password = forms.CharField(widget=forms.PasswordInput(attrs={'class': 'input-field', 'placeholder': 'Password'}))
+    username = forms.CharField(
+        label="Username or Email",
+        widget=forms.TextInput(attrs={
+            'class': 'input-field',
+            'placeholder': 'Username or Email',
+            'autofocus': True
+        })
+    )
+    password = forms.CharField(
+        label="Password",
+        widget=forms.PasswordInput(attrs={
+            'class': 'input-field',
+            'placeholder': 'Password'
+        })
+    )
 
 
 class CustomPasswordResetForm(PasswordResetForm):

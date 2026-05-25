@@ -130,4 +130,9 @@ LOGIN_REDIRECT_URL = 'users:dashboard'
 
 LOGOUT_REDIRECT_URL = 'users:login'
 
+AUTHENTICATION_BACKENDS = [
+    'users.backends.EmailOrUsernameModelBackend',
+    'django.contrib.auth.backends.ModelBackend',
+]
+
 GROQ_API_KEY = os.getenv('GROQ_API_KEY', '')

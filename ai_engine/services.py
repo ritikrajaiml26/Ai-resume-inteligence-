@@ -156,7 +156,37 @@ class AIEngine:
         )
         return ai_summaries
 
-    def chat_edit_resume(self, resume: Resume, user_message: str):
+    def parse_resume_text(self, text: str):
+        """Uses AI to parse raw extracted resume text into structured JSON format."""
+        system_prompt = (
+            "You are an expert AI Resume Parser. Your task is to extract details from the raw resume text "
+            "and format them into a valid JSON object. Do not invent any information, extract what is available.\n"
+            "If any field is missing or not found in the text, return an empty string or empty list as appropriate.\n\n"
+            "JSON structure to return:\n"
+            "Return a valid JSON object with EXACTLY these fields:\n"
+            "  - 'full_name': Candidate's full name\n"
+            "  - 'title': Target role/title\n"
+            "  - 'summary': A summary statement (around 50-100 words)\n"
+            "  - 'contact_email': Email address\n"
+            "  - 'contact_phone': Phone number\n"
+            "  - 'skills': List of skill names (e.g. ['Python', 'Django', 'React'])\n"
+            "  - 'experiences': List of dictionaries with keys ('role', 'company', 'duration', 'location', 'description')\n"
+            "  - 'projects': List of dictionaries with keys ('name', 'technologies', 'description')\n\n"
+            "IMPORTANT: Return ONLY valid JSON. No markdown, no backticks, no extra text."
+        )
+        
+        user_prompt = f"Raw Resume Text:\n{text}"
+        try:
+            response_text = self._call_groq(user_prompt, system=system_prompt, json_mode=True).strip()
+            json_match = re.search(r'\{.*\}', response_text, re.DOTALL)
+            if json_match:
+                response_text = json_match.group()
+            return json.loads(response_text)
+        except Exception as e:
+            print(f"Error parsing resume text: {e}")
+            return {}
+
+    def chat_edit_resume(self, resume: Resume, user_message: str, user_name: str = None, job_desc: str = "", missing_skills: list = None):
         resume_data = {
             "full_name": resume.full_name,
             "title": resume.title,
@@ -165,13 +195,33 @@ class AIEngine:
             "experiences": [{"role": e.role, "company": e.company, "bullets": e.bullets} for e in resume.experiences.all()],
         }
 
+        greeting_name = user_name if user_name else (resume.full_name or "Candidate")
+        skills_str = ", ".join(missing_skills) if missing_skills else "none"
+
         system_prompt = (
-            "You are an expert AI Resume Editor. Your task is to analyze the user's request "
-            "and return a valid JSON object with EXACTLY these fields:\n"
-            "  - 'explanation': A friendly message explaining what you changed.\n"
-            "  - 'updates': A dictionary of fields to update (keys: 'full_name', 'title', 'summary').\n"
-            "  - 'skill_updates': A list of all skills (if changed).\n"
-            "  - 'experience_updates': A list of dictionaries ('role', 'company', 'bullets').\n"
+            "You are an expert AI Resume Editor. Your task is to analyze the user's request, "
+            "determine what changes are needed, apply them, and respond in a very friendly, "
+            f"conversational way in Hinglish (Hindi + English mix) or English. Always greet the user as '{greeting_name}' at the beginning.\n\n"
+            "Context Information:\n"
+            f"- Mismatched/Missing Skills for this job: {skills_str}\n"
+            f"- Target Job Description: {job_desc}\n\n"
+            "Special Directives:\n"
+            "- ALWAYS mention the mismatched/missing skills in your response. Point out which skills are currently missing from their resume and advise adding them.\n"
+            "- If the user says 'tum add kr do', 'add them', 'add it', 'optimize', 'tum kr do', or similar requests:\n"
+            "  1. You MUST automatically inject all missing skills into 'skill_updates'.\n"
+            "  2. Rewrite their 'summary' to be highly professional and incorporate these skills (around 50 words).\n"
+            "  3. Rewrite/enhance the experience bullets to naturally showcase these newly added skills. Make it extremely ATS-optimized!\n"
+            "  4. Confirm this in your friendly Hinglish explanation (e.g. 'Maine aapke resume me saare missing skills add kar diye hain aur resume fully optimize kar diya hai!').\n"
+            f"- Always keep your 'explanation' friendly, welcoming, and natural. Greet the user by saying 'Namaste {greeting_name}!' or similar.\n"
+            "- At the end of the 'explanation' message, ALWAYS ask:\n"
+            "  'Maine aapka resume update kar diya hai! Kya aap isme kuch aur change karwana chahte hain?'\n"
+            "  (or in English: 'I have updated your resume! Would you like me to make any other changes?').\n\n"
+            "JSON structure to return:\n"
+            "Return a valid JSON object with EXACTLY these fields:\n"
+            "  - 'explanation': Friendly chat message pointing out missing skills, explaining changes, and asking what else to do.\n"
+            "  - 'updates': Dictionary of field updates (keys: 'full_name', 'title', 'summary'). Only include changed fields.\n"
+            "  - 'skill_updates': List of all skills (if changed/updated).\n"
+            "  - 'experience_updates': List of dictionaries ('role', 'company', 'bullets' for description).\n\n"
             "IMPORTANT: Return ONLY valid JSON. No markdown, no backticks, no extra text."
         )
 
